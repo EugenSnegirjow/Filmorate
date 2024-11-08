@@ -19,10 +19,10 @@ public class FilmController {
 
     private static final Logger log = (Logger) LoggerFactory.getLogger(FilmController.class);
 
-    private final Map<Long, Film> films = new HashMap<>();
+    private static final Map<Long, Film> films = new HashMap<>();
 
-    public final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-    public final int MAX_DESCRIPTION_LENGTH = 200;
+    public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    public static final int MAX_DESCRIPTION_LENGTH = 200;
 
     @GetMapping
     public Collection<Film> getAllFilms() {
@@ -34,6 +34,8 @@ public class FilmController {
 
         log.info("Фильм из тела POST запроса - {}", film);
 
+        //film.getName() == null, по моему мнению, при чтении кода воспринимается легче, чем
+        //Objects.isNull(film.getName())
         if (film.getName() == null || film.getName().isBlank()) {
             log.info("Название фильма не должно быть пустым - {}", film.getName());
             throw new ValidationException("Название фильма не должно быть пустым");

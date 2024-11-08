@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private static final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
     public Collection<User> getAllUsers() {
