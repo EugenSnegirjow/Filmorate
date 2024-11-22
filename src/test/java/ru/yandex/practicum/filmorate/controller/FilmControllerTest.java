@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,6 +15,8 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.yandex.practicum.filmorate.service.FilmService.MAX_DESCRIPTION_LENGTH;
+import static ru.yandex.practicum.filmorate.service.FilmService.MIN_RELEASE_DATE;
 
 class FilmControllerTest {
 
@@ -23,7 +28,12 @@ class FilmControllerTest {
 
     @BeforeEach
     public void createController() {
-        controller = new FilmController();
+        controller = new FilmController(
+                new FilmService(
+                        new InMemoryFilmStorage(),
+                        new InMemoryUserStorage()
+                )
+        );
 
         film0 = Film.builder()
                 .name("Побег из Шоушенка")
@@ -67,7 +77,7 @@ class FilmControllerTest {
                 .name("Первый фильм")
                 .description("Поезд")
                 .duration(4)
-                .releaseDate(controller.MIN_RELEASE_DATE)
+                .releaseDate(MIN_RELEASE_DATE)
                 .build();
 
         Film actual = controller.create(filmWithDateEqualsMinDate);
@@ -82,7 +92,7 @@ class FilmControllerTest {
                 .name("Второй фильм")
                 .description("2 поезда")
                 .duration(8)
-                .releaseDate((LocalDate.from(controller.MIN_RELEASE_DATE)).plusDays(1))
+                .releaseDate((LocalDate.from(MIN_RELEASE_DATE)).plusDays(1))
                 .build();
 
         Film actual = controller.create(filmWithDateAfterMinDate);
@@ -97,14 +107,14 @@ class FilmControllerTest {
                 .name("Очень старый фильм")
                 .description("Фильм снятый до изобретения синематографа")
                 .duration(100)
-                .releaseDate(LocalDate.from(controller.MIN_RELEASE_DATE).minusDays(1))
+                .releaseDate(LocalDate.from(MIN_RELEASE_DATE).minusDays(1))
                 .build();
         ValidationException actual = assertThrows(
                 ValidationException.class,
                 () -> controller.create(filmWithDateBeforeMinDate)
         );
 
-        assertEquals("Дата релиза должна быть не раньше " + controller.MIN_RELEASE_DATE, actual.getMessage());
+        assertEquals("Дата релиза должна быть не раньше " + MIN_RELEASE_DATE, actual.getMessage());
     }
 
     @Test
@@ -142,7 +152,7 @@ class FilmControllerTest {
                 () -> controller.create(filmWithDescriptionLength201)
         );
         assertEquals("Длина описания фильма не может быть больше "
-                + controller.MAX_DESCRIPTION_LENGTH + " символов", actual.getMessage(),
+                        + MAX_DESCRIPTION_LENGTH + " символов", actual.getMessage(),
                 "Неверно добавляется фильм с длинным описанием");
     }
 
@@ -180,6 +190,7 @@ class FilmControllerTest {
         assertEquals("Неверно указан id фильма", actual.getMessage(),
                 "Неверно обрабатывается обновление фильма с неверным id");
     }
+
     @Test
     void updateWithVoidId() {
         Film voidIdFilm = Film.builder()
