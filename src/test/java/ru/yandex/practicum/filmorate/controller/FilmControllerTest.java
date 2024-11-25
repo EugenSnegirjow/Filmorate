@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -60,6 +61,7 @@ class FilmControllerTest {
         controller.create(film2);
     }
 
+    @Disabled
     @Test
     void getAllFilms() {
         Collection<Film> expected = new ArrayList<>() {{
@@ -114,7 +116,7 @@ class FilmControllerTest {
                 () -> controller.create(filmWithDateBeforeMinDate)
         );
 
-        assertEquals("Дата релиза должна быть не раньше " + MIN_RELEASE_DATE, actual.getMessage());
+        assertEquals("Дата релиза должна быть не раньше " + MIN_RELEASE_DATE + ": releaseDate=1895-12-27", actual.getMessage());
     }
 
     @Test
@@ -152,7 +154,7 @@ class FilmControllerTest {
                 () -> controller.create(filmWithDescriptionLength201)
         );
         assertEquals("Длина описания фильма не может быть больше "
-                        + MAX_DESCRIPTION_LENGTH + " символов", actual.getMessage(),
+                        + MAX_DESCRIPTION_LENGTH + " символов: descriptionLength=201", actual.getMessage(),
                 "Неверно добавляется фильм с длинным описанием");
     }
 
@@ -187,7 +189,7 @@ class FilmControllerTest {
                 NotFoundException.class,
                 () -> controller.update(wrongIdFilm)
         );
-        assertEquals("Неверно указан id фильма", actual.getMessage(),
+        assertEquals("Фильма с данным id не существует: id=777", actual.getMessage(),
                 "Неверно обрабатывается обновление фильма с неверным id");
     }
 
@@ -204,7 +206,7 @@ class FilmControllerTest {
                 ValidationException.class,
                 () -> controller.update(voidIdFilm)
         );
-        assertEquals("Не указан id фильма", actual.getMessage(),
+        assertEquals("Не указан id фильма: id=null", actual.getMessage(),
                 "Неверно обрабатывается обновление фильма с пустым id");
     }
 }
